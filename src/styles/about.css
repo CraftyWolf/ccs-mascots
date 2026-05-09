@@ -40,7 +40,7 @@
 }
 
 .about-heading {
-  font-family: 'Fredoka One', cursive;
+  font-family: 'Raleway', sans-serif;
   font-size: clamp(2.2rem, 4vw, 3.2rem);
   color: var(--purple);
   line-height: 1.1;
