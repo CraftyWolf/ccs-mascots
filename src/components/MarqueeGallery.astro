@@ -48,18 +48,23 @@ function makeItem(src) {
     img.className = 'gallery-item-img is-loading';
     img.src = src;
     img.alt = 'CCS Mascots fursuit';
-    img.loading = 'lazy';
     img.decoding = 'async';
+    img.loading = 'eager';
+
     const markLoaded = () => {
       d.classList.remove('is-loading');
       d.classList.add('has-img');
       img.classList.remove('is-loading');
       img.classList.add('is-loaded');
     };
+
     img.addEventListener('load', markLoaded, { once: true });
+    img.addEventListener('error', markLoaded, { once: true }); // don't hang on 404s
+
     if (img.complete && img.naturalWidth > 0) {
       markLoaded();
     }
+
     d.appendChild(img);
   } else {
     d.className = 'gallery-item';
