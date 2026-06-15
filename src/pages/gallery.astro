@@ -57,36 +57,37 @@ const images = (galleries?.galleryImages ?? [])
   </main>
 
   <script>
-    window.addEventListener('load', () => {
-      const grid = document.querySelector('.gallery-grid') as HTMLElement;
-      const items = Array.from(grid.querySelectorAll('.gallery-grid-item')) as HTMLElement[];
+  window.addEventListener('DOMContentLoaded', () => {
+    const grid = document.querySelector('.gallery-grid') as HTMLElement;
+    const items = Array.from(grid.querySelectorAll('.gallery-grid-item')) as HTMLElement[];
 
-      const lefts = [...new Set(items.map((el) => Math.round(el.getBoundingClientRect().left)))]
-        .sort((a, b) => a - b);
-
-      items.forEach((item) => {
-        const col = lefts.indexOf(Math.round(item.getBoundingClientRect().left));
-        item.style.animationDelay = `${col * 100}ms`;
-      });
-
-      items.forEach((item) => item.classList.add('go'));
-
-      const imgs = Array.from(grid.querySelectorAll('.gallery-grid-img')) as HTMLImageElement[];
-      imgs.forEach((img) => {
-        const markLoaded = () => {
-          img.classList.remove('is-loading');
-          img.classList.add('is-loaded');
-          img.parentElement?.classList.remove('is-loading');
-          img.parentElement?.classList.add('has-img');
-        };
-        if (img.complete && img.naturalWidth > 0) {
-          markLoaded();
-        } else {
-          img.addEventListener('load', markLoaded, { once: true });
-        }
-      });
+    const lefts = [...new Set(items.map((el) => Math.round(el.getBoundingClientRect().left)))]
+      .sort((a, b) => a - b);
+    items.forEach((item) => {
+      const col = lefts.indexOf(Math.round(item.getBoundingClientRect().left));
+      item.style.animationDelay = `${col * 100}ms`;
     });
-  </script>
+    items.forEach((item) => item.classList.add('go'));
+
+    const imgs = Array.from(grid.querySelectorAll('.gallery-grid-img')) as HTMLImageElement[];
+
+    const markLoaded = (img: HTMLImageElement) => {
+      img.classList.remove('is-loading');
+      img.classList.add('is-loaded');
+      img.parentElement?.classList.remove('is-loading');
+      img.parentElement?.classList.add('has-img');
+    };
+
+    imgs.forEach((img) => {
+      if (img.complete && img.naturalWidth > 0) {
+        markLoaded(img);
+      } else {
+        img.addEventListener('load', () => markLoaded(img), { once: true });
+        img.addEventListener('error', () => markLoaded(img), { once: true }); // don't hang on broken images
+      }
+    });
+  });
+</script>
 
   <Footer
   tagline={homeContent?.footer?.footerTagline}
