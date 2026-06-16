@@ -16,19 +16,19 @@
   "about": {
     "aboutTitle": "About Us",
     "aboutBody": "Local to the Maine Furry Community since 2014, we have prided ourselves on providing Quality, Affordable Mascot Style Costumes. We use innovative methods such as 3D modeling and printing, as well as the finest fabrics and materials, to create a comfortable and durable costume that will last for years to come.",
-    "aboutImage": "/src/images/aboutImage.jpg"
+    "aboutImage": "/src/images/about/aboutImage.jpg"
   },
   "cta": {
     "ctaTitle": "Ready to Bring Your Character to Life?",
     "ctaSubtitle": "Custom fursuits built with love, right here in Maine.",
-    "ctaImage": "/src/images/ctaImage.jpg",
+    "ctaImage": "/src/images/cta/ctaImage.jpg",
     "ctaButtonText": "Get a Quote",
     "ctaButtonUrl": "https://docs.google.com/forms/d/e/1FAIpQLSdvfWdapp_bzKXglitzdxh65CiGRf7PifEItHlmHBU5zKwX_Q/viewform"
   },
   "footer": {
     "footerTagline": "Delivering smiles to the Furry Community and Costume Enthusiasts alike since 2014",
     "footerLocation": "Augusta ME, 04330",
-    "footerEmail": "CraftyWolf@ccsmascots.net",
+    "footerEmail": "thecraftycanine@yahoo.com",
     "facebookUrl": "https://www.facebook.com/CCSMascots/",
     "instagramUrl": "https://www.instagram.com/ccsmascots/",
     "tiktokUrl": "https://www.tiktok.com/@ccsmascots"
