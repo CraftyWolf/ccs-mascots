@@ -69,24 +69,26 @@ const jsonLd = JSON.stringify({
   <About title={homeContent?.about?.aboutTitle} body={homeContent?.about?.aboutBody} image={aboutImage} />
   <CtaBanner title={homeContent?.cta?.ctaTitle} subtitle={homeContent?.cta?.ctaSubtitle} buttonText={homeContent?.cta?.ctaButtonText} buttonUrl={homeContent?.cta?.ctaButtonUrl ?? undefined} image={ctaImage} />
 
-  <script>
-    const initHomeReveals = () => {
-      const observer = new IntersectionObserver(
-        (entries) => {
-          entries.forEach((entry) => {
-            if (entry.isIntersecting) {
-              entry.target.classList.add('visible');
-              observer.unobserve(entry.target);
-            }
-          });
-        },
-        { threshold: 0.35, rootMargin: '0px 0px -80px 0px' }
-      );
+  <script data-astro-rerun>
+    (() => {
+      const initHomeReveals = () => {
+        const observer = new IntersectionObserver(
+          (entries) => {
+            entries.forEach((entry) => {
+              if (entry.isIntersecting) {
+                entry.target.classList.add('visible');
+                observer.unobserve(entry.target);
+              }
+            });
+          },
+          { threshold: 0.35, rootMargin: '0px 0px -80px 0px' }
+        );
 
-      document.querySelectorAll('.pg-item, .about-text, .about-img-wrap, .cta-banner').forEach((el) => observer.observe(el));
-    };
+        document.querySelectorAll('.pg-item, .about-text, .about-img-wrap, .cta-banner').forEach((el) => observer.observe(el));
+      };
 
-    document.addEventListener('astro:page-load', initHomeReveals, { once: true });
+      initHomeReveals();
+    })();
   </script>
 
   <Footer
