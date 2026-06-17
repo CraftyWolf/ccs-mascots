@@ -48,6 +48,7 @@
   min-height: 180px;
 }
 
+.gallery-grid-item.visible,
 .gallery-grid-item.go {
   animation-play-state: running;
 }
