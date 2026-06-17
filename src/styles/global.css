@@ -30,6 +30,10 @@ p {
   --col-w:     344px;
 }
 
+html {
+  background: var(--cream);
+}
+
 body {
   min-height: 100vh;
   margin: 0;
@@ -38,6 +42,8 @@ body {
   background: var(--cream);
   color: var(--text);
   overflow-x: hidden;
+  position: relative;
+  isolation: isolate;
 }
 
 .site-bg {
