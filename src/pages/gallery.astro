@@ -72,58 +72,60 @@ const preloadImages = (
 
   </main>
 
-  <script>
-  const initGallery = () => {
-    const grid = document.querySelector('.gallery-grid') as HTMLElement;
-    if (!grid) return;
+  <script data-astro-rerun>
+    (() => {
+      const initGallery = () => {
+        const grid = document.querySelector('.gallery-grid');
+        if (!grid) return;
 
-    const items = Array.from(grid.querySelectorAll('.gallery-grid-item')) as HTMLElement[];
+        const items = Array.from(grid.querySelectorAll('.gallery-grid-item'));
 
-    const lefts = [...new Set(items.map((el) => Math.round(el.getBoundingClientRect().left)))]
-      .sort((a, b) => a - b);
-    items.forEach((item) => {
-      const col = lefts.indexOf(Math.round(item.getBoundingClientRect().left));
-      item.style.animationDelay = `${col * 100}ms`;
-    });
-    items.forEach((item) => item.classList.add('go'));
+        const lefts = [...new Set(items.map((el) => Math.round(el.getBoundingClientRect().left)))]
+          .sort((a, b) => a - b);
+        items.forEach((item) => {
+          const col = lefts.indexOf(Math.round(item.getBoundingClientRect().left));
+          item.style.animationDelay = `${col * 100}ms`;
+        });
+        items.forEach((item) => item.classList.add('go'));
 
-    const imgs = Array.from(grid.querySelectorAll('.gallery-grid-img')) as HTMLImageElement[];
+        const imgs = Array.from(grid.querySelectorAll('.gallery-grid-img'));
 
-    const markLoaded = (img: HTMLImageElement) => {
-      img.classList.remove('is-loading');
-      img.classList.add('is-loaded');
-      img.closest('.gallery-grid-item')?.classList.remove('is-loading');
-      img.closest('.gallery-grid-item')?.classList.add('has-img');
-    };
+        const markLoaded = (img) => {
+          img.classList.remove('is-loading');
+          img.classList.add('is-loaded');
+          img.closest('.gallery-grid-item')?.classList.remove('is-loading');
+          img.closest('.gallery-grid-item')?.classList.add('has-img');
+        };
 
-    const waitForDecode = async (img: HTMLImageElement) => {
-      if (typeof img.decode !== 'function') {
-        markLoaded(img);
-        return;
-      }
+        const waitForDecode = async (img) => {
+          if (typeof img.decode !== 'function') {
+            markLoaded(img);
+            return;
+          }
 
-      try {
-        await img.decode();
-      } catch {
-        // If decoding fails, fall back to revealing the image so the gallery doesn't stall.
-      }
+          try {
+            await img.decode();
+          } catch {
+            // If decoding fails, fall back to revealing the image so the gallery doesn't stall.
+          }
 
-      markLoaded(img);
-    };
+          markLoaded(img);
+        };
 
-    imgs.forEach((img) => {
-      if (img.complete && img.naturalWidth > 0) {
-        void waitForDecode(img);
-      } else {
-        img.addEventListener('load', () => {
-          void waitForDecode(img);
-        }, { once: true });
-        img.addEventListener('error', () => markLoaded(img), { once: true }); // don't hang on broken images
-      }
-    });
-  };
+        imgs.forEach((img) => {
+          if (img.complete && img.naturalWidth > 0) {
+            void waitForDecode(img);
+          } else {
+            img.addEventListener('load', () => {
+              void waitForDecode(img);
+            }, { once: true });
+            img.addEventListener('error', () => markLoaded(img), { once: true }); // don't hang on broken images
+          }
+        });
+      };
 
-  document.addEventListener('astro:page-load', initGallery, { once: true });
+      initGallery();
+    })();
 </script>
 
   <Footer
