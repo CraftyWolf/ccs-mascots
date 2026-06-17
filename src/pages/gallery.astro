@@ -2,7 +2,7 @@
 import Base from '../layouts/Base.astro';
 import Nav from '../components/Nav.astro';
 import Footer from '../components/Footer.astro';
-import { Image } from 'astro:assets';
+import { Image, getImage } from 'astro:assets';
 import type { ImageMetadata } from 'astro';
 import '../styles/global.css';
 import '../styles/gallery.css';
@@ -24,6 +24,15 @@ const images = (galleries?.galleryImages ?? [])
     alt: item.alt || `CCS Mascots fursuit ${i + 1}`,
   }))
   .filter((item): item is { src: ImageMetadata; alt: string } => !!item.src);
+
+const preloadImages = (
+  await Promise.all(
+    images.slice(0, 4).map(async ({ src }) => {
+      const optimized = await getImage({ src });
+      return optimized.src;
+    })
+  )
+).filter(Boolean);
 ---
 
 <Base
@@ -33,6 +42,9 @@ const images = (galleries?.galleryImages ?? [])
   twitterSite="@CCSmascots"
   ogImage="/og-image.png"
 >
+  {preloadImages.map((href) => (
+    <link rel="preload" as="image" href={href} />
+  ))}
 
   <Nav />
 
@@ -44,13 +56,14 @@ const images = (galleries?.galleryImages ?? [])
     </header>
 
     <div class="gallery-grid">
-      {images.map(({ src, alt }) => (
+      {images.map(({ src, alt }, index) => (
         <div class="gallery-grid-item is-loading">
           <Image
             src={src}
             alt={alt}
             class="gallery-grid-img is-loading"
             loading="eager"
+            fetchpriority={index < preloadImages.length ? 'high' : 'low'}
             decoding="async"
           />
         </div>
