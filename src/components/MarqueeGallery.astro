@@ -7,15 +7,60 @@ const { images } = Astro.props;
 
 <div class="hero-right" id="galleryRight"></div>
 
-<!--
-  Astro's define:vars injects the images array as a JS variable
-  into this inline script block, which then runs the full marquee logic.
-  Add images in Keystatic under the Galleries singleton `galleryImages` field.
--->
 <script define:vars={{ GALLERY_IMAGES: images }} data-astro-rerun>
 (() => {
+  // Inject only keyframes + animation assignments globally.
+  // All layout/sizing rules already exist in hero.css on the original class names.
+  if (!document.getElementById('ccs-marquee-styles')) {
+    const s = document.createElement('style');
+    s.id = 'ccs-marquee-styles';
+    s.textContent = `
+      @keyframes ccs-up {
+        from { transform: translate3d(0, 0, 0); }
+        to   { transform: translate3d(0, var(--ccs-dist), 0); }
+      }
+      @keyframes ccs-down {
+        from { transform: translate3d(0, var(--ccs-dist), 0); }
+        to   { transform: translate3d(0, 0, 0); }
+      }
+      @keyframes ccs-left {
+        from { transform: translate3d(0, 0, 0); }
+        to   { transform: translate3d(var(--ccs-dist), 0, 0); }
+      }
+      @keyframes ccs-right {
+        from { transform: translate3d(var(--ccs-dist), 0, 0); }
+        to   { transform: translate3d(0, 0, 0); }
+      }
+
+      .marquee-col.dir-up {
+        animation: ccs-up var(--ccs-dur) linear infinite;
+      }
+      .marquee-col.dir-down {
+        animation: ccs-down var(--ccs-dur) linear infinite;
+      }
+      .row-wrap .marquee-col.dir-up {
+        animation: ccs-left var(--ccs-dur) linear infinite;
+      }
+      .row-wrap .marquee-col.dir-down {
+        animation: ccs-right var(--ccs-dur) linear infinite;
+      }
+
+      #galleryRight:hover .marquee-col {
+        animation-play-state: paused;
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        .marquee-col { animation: none !important; }
+      }
+    `;
+    document.head.appendChild(s);
+  }
+
   window.__ccsMarqueeGallery ??= {};
   const state = window.__ccsMarqueeGallery;
+
+  // px/sec — the only value to tune for speed, independent of image count
+  const PX_PER_SEC = 80;
 
   function shuffle(arr) {
     const a = arr.slice();
@@ -27,7 +72,6 @@ const { images } = Astro.props;
   }
 
   const IMAGES = shuffle(GALLERY_IMAGES);
-
   const mobile = () => window.innerWidth <= 768 || window.innerHeight < 830;
 
   function setNavHeight() {
@@ -49,7 +93,7 @@ const { images } = Astro.props;
       img.className = 'gallery-item-img is-loading';
       img.src = src;
       img.alt = 'CCS Mascots fursuit';
-      img.decoding = 'sync';
+      img.decoding = 'async';
       img.loading = 'eager';
       img.fetchPriority = 'high';
 
@@ -60,29 +104,14 @@ const { images } = Astro.props;
         img.classList.add('is-loaded');
       };
 
-      const waitForDecode = async () => {
-        if (typeof img.decode !== 'function') {
-          markLoaded();
-          return;
+      img.addEventListener('load', async () => {
+        if (typeof img.decode === 'function') {
+          try { await img.decode(); } catch {}
         }
-
-        try {
-          await img.decode();
-        } catch {
-          // If decoding fails, fall back to showing the image so the carousel doesn't stay gray.
-        }
-
         markLoaded();
-      };
-
-      img.addEventListener('load', () => {
-        void waitForDecode();
       }, { once: true });
-      img.addEventListener('error', markLoaded, { once: true }); // don't hang on 404s
-
-      if (img.complete && img.naturalWidth > 0) {
-        void waitForDecode();
-      }
+      img.addEventListener('error', markLoaded, { once: true });
+      if (img.complete && img.naturalWidth > 0) markLoaded();
 
       d.appendChild(img);
     } else {
@@ -91,106 +120,68 @@ const { images } = Astro.props;
     return d;
   }
 
-  function makeCol(dir, images) {
+  function makeCol(dir, imgs) {
     const col = document.createElement('div');
     col.className = `marquee-col dir-${dir}`;
-    const items = images.length > 0 ? images : Array(6).fill('');
-    [...items, ...items].forEach((src) => col.appendChild(makeItem(src)));
+    const items = imgs.length > 0 ? imgs : Array(6).fill('');
+    [...items, ...items].forEach(src => col.appendChild(makeItem(src)));
     return col;
+  }
+
+  // Measures the first half of items to get the true pixel loop distance,
+  // then derives duration from PX_PER_SEC so speed never depends on image count.
+  function applyAnimation(col, isMob) {
+    const items = Array.from(col.children);
+    const half = items.length / 2;
+    if (half === 0) return;
+
+    // Read the gap from the computed style so we don't hardcode it here
+    const gap = parseFloat(getComputedStyle(col).gap) || 0;
+
+    let dist = 0;
+    for (let i = 0; i < half; i++) {
+      const r = items[i].getBoundingClientRect();
+      dist += isMob ? r.width : r.height;
+    }
+    dist += gap * half; // N items have N gaps after them in the duplicated set
+
+    const durMs = Math.round((dist / PX_PER_SEC) * 1000);
+    col.style.setProperty('--ccs-dist', `-${dist}px`);
+    col.style.setProperty('--ccs-dur', `${durMs}ms`);
+  }
+
+  function measureAll(isMob) {
+    const c = document.getElementById('galleryRight');
+    if (!c) return;
+    c.querySelectorAll('.marquee-col').forEach(col => applyAnimation(col, isMob));
   }
 
   function buildDesktop(container) {
     container.innerHTML = '';
     const [col1imgs, col2imgs] = IMAGES.length > 0 ? splitImages(2) : [[], []];
-    container.appendChild(makeCol('up', col1imgs));
+    container.appendChild(makeCol('up',   col1imgs));
     container.appendChild(makeCol('down', col2imgs));
   }
 
   function buildMobile(container) {
     container.innerHTML = '';
     const [row1imgs, row2imgs] = IMAGES.length > 0 ? splitImages(2) : [[], []];
-    ['up', 'down'].forEach((dir, i) => {
+    [['up', row1imgs], ['down', row2imgs]].forEach(([dir, imgs]) => {
       const wrap = document.createElement('div');
       wrap.className = 'row-wrap';
-      wrap.appendChild(makeCol(dir, i === 0 ? row1imgs : row2imgs));
+      wrap.appendChild(makeCol(dir, imgs));
       container.appendChild(wrap);
     });
   }
 
-  const colAnimations = new Map();
-
-  function startAnimations(isMob) {
-    const dpr = window.devicePixelRatio || 1;
-    document.querySelectorAll('.marquee-col').forEach((col) => {
-      const isUp = col.classList.contains('dir-up');
-      const items = Array.from(col.children);
-      const half = items.length / 2;
-      if (half === 0) return;
-
-      const r0 = items[0].getBoundingClientRect();
-      const rH = items[half].getBoundingClientRect();
-      let size = isMob ? (rH.left - r0.left) : (rH.top - r0.top);
-      size = Math.round(size * dpr) / dpr;
-      if (size <= 0) return;
-
-      const duration = isMob
-        ? (isUp ? 31500 : 38500)
-        : (isUp ? 38500 : 49000);
-      const speed = size / duration;
-
-      let pos = isUp ? 0 : size / 2;
-      let lastTs = null;
-      let running = true;
-      let rafId;
-
-      const existing = colAnimations.get(col);
-      if (existing) existing.cancel();
-
-      function tick(ts) {
-        if (running) {
-          if (lastTs !== null) {
-            pos = (pos + speed * (ts - lastTs)) % size;
-          }
-          lastTs = ts;
-        } else {
-          lastTs = null;
-        }
-
-        const raw = isUp ? -pos : -(size - pos);
-        const snapped = Math.round(raw * dpr) / dpr;
-        col.style.transform = isMob
-          ? `translate3d(${snapped}px, 0, 0)`
-          : `translate3d(0, ${snapped}px, 0)`;
-
-        rafId = requestAnimationFrame(tick);
-      }
-
-      rafId = requestAnimationFrame(tick);
-      colAnimations.set(col, {
-        pause() { running = false; },
-        play() { running = true; },
-        cancel() { cancelAnimationFrame(rafId); col.style.transform = ''; },
-      });
-    });
-  }
-
   function build() {
-    colAnimations.forEach((a) => a.cancel());
-    colAnimations.clear();
     const c = document.getElementById('galleryRight');
     if (!c) return;
     const isMob = mobile();
     isMob ? buildMobile(c) : buildDesktop(c);
-    requestAnimationFrame(() => requestAnimationFrame(() => startAnimations(isMob)));
-
-    const right = document.getElementById('galleryRight');
-    if (right) {
-      right.addEventListener('mouseenter', () => colAnimations.forEach((a) => a.pause()));
-      right.addEventListener('mouseleave', () => colAnimations.forEach((a) => a.play()));
-      right.addEventListener('touchstart', () => colAnimations.forEach((a) => a.pause()), { passive: true });
-      right.addEventListener('touchend', () => colAnimations.forEach((a) => a.play()));
-    }
-
+    // Two rAF passes: first lets the browser lay out the new DOM,
+    // second ensures getBoundingClientRect returns real painted sizes.
+    requestAnimationFrame(() => requestAnimationFrame(() => measureAll(isMob)));
     state.wasMobile = isMob;
   }
 
@@ -208,7 +199,7 @@ const { images } = Astro.props;
         state.wasMobile = now;
         state.build?.();
       } else {
-        requestAnimationFrame(() => requestAnimationFrame(() => startAnimations(now)));
+        requestAnimationFrame(() => requestAnimationFrame(() => measureAll(now)));
       }
     });
   }
