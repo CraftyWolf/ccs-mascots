@@ -104,6 +104,7 @@ export default config({
           facebookUrl: fields.url({ label: 'Facebook URL', defaultValue: 'https://www.facebook.com/CCSMascots/' }),
           instagramUrl: fields.url({ label: 'Instagram URL', defaultValue: 'https://www.instagram.com/ccsmascots/' }),
           tiktokUrl: fields.url({ label: 'TikTok URL', defaultValue: 'https://www.tiktok.com/@ccsmascots' }),
+          twitterUrl: fields.url({ label: 'Twitter URL', defaultValue: 'https://x.com/CCSMascots' }),
         }, { label: 'Footer' }),
       },
     }),
