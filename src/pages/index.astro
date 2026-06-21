@@ -10,15 +10,11 @@ import '../styles/global.css';
 import { createReader } from '@keystatic/core/reader';
 import keystaticConfig from '../../keystatic.config';
 import type { ImageMetadata } from 'astro';
-
 export const prerender = true;
-
 const reader = createReader(process.cwd(), keystaticConfig);
 const homeContent = await reader.singletons.home.read();
 const pricingCards = await reader.collections.pricingGuideCards.all();
-
 const allImages = import.meta.glob('/src/images/**/*.{jpg,jpeg,png,webp,gif,avif}', { eager: true }) as Record<string, { default: ImageMetadata }>;
-
 const tiers = pricingCards
   .filter(({ entry }) => !!entry.image)
   .map(({ entry }) => ({
@@ -27,9 +23,15 @@ const tiers = pricingCards
     image: allImages[entry.image!]?.default,
     description: entry.description,
   }));
-
 const aboutImage = homeContent?.about?.aboutImage ? allImages[homeContent.about.aboutImage]?.default : undefined;
 const ctaImage = homeContent?.cta?.ctaImage ? allImages[homeContent.cta.ctaImage]?.default : undefined;
+
+const sameAs = [
+  homeContent?.footer?.facebookUrl ?? 'https://www.facebook.com/CCSMascots/',
+  homeContent?.footer?.instagramUrl ?? 'https://www.instagram.com/ccsmascots/',
+  homeContent?.footer?.tiktokUrl ?? 'https://www.tiktok.com/@ccsmascots',
+  homeContent?.footer?.twitterUrl ?? 'https://x.com/CCSMascots',
+].filter((url): url is string => !!url);
 
 const jsonLd = JSON.stringify({
   "@context": "https://schema.org",
@@ -45,11 +47,7 @@ const jsonLd = JSON.stringify({
     "postalCode": "04330",
     "addressCountry": "US"
   },
-  "sameAs": [
-    "https://www.facebook.com/CCSMascots/",
-    "https://www.instagram.com/ccsmascots/",
-    "https://www.tiktok.com/@ccsmascots"
-  ]
+  "sameAs": sameAs
 });
 ---
 
@@ -98,6 +96,7 @@ const jsonLd = JSON.stringify({
     facebookUrl={homeContent?.footer?.facebookUrl}
     instagramUrl={homeContent?.footer?.instagramUrl}
     tiktokUrl={homeContent?.footer?.tiktokUrl}
+    twitterUrl={homeContent?.footer?.twitterUrl}
   />
 
 </Base>

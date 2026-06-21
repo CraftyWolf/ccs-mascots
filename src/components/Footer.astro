@@ -6,6 +6,7 @@ interface Props {
   facebookUrl?: string | null;
   instagramUrl?: string | null;
   tiktokUrl?: string | null;
+  twitterUrl?: string | null;
 }
 const {
   tagline = 'Delivering smiles to the Furry Community and Costume Enthusiasts alike since 2014',
@@ -14,6 +15,7 @@ const {
   facebookUrl = 'https://www.facebook.com/CCSMascots/',
   instagramUrl = 'https://www.instagram.com/ccsmascots/',
   tiktokUrl = 'https://www.tiktok.com/@ccsmascots',
+  twitterUrl = 'https://x.com/CCSMascots',
 } = Astro.props as Props;
 ---
 <footer class="footer">
@@ -40,6 +42,13 @@ const {
         <a href={tiktokUrl} aria-label="TikTok" class="footer-social-link">
           <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32" fill="currentColor">
             <path d="M24.562,7.613c-1.508-.983-2.597-2.557-2.936-4.391-.073-.396-.114-.804-.114-1.221h-4.814l-.008,19.292c-.081,2.16-1.859,3.894-4.039,3.894-.677,0-1.315-.169-1.877-.465-1.288-.678-2.169-2.028-2.169-3.582,0-2.231,1.815-4.047,4.046-4.047,.417,0,.816,.069,1.194,.187v-4.914c-.391-.053-.788-.087-1.194-.087-4.886,0-8.86,3.975-8.86,8.86,0,2.998,1.498,5.65,3.783,7.254,1.439,1.01,3.19,1.606,5.078,1.606,4.886,0,8.86-3.975,8.86-8.86V11.357c1.888,1.355,4.201,2.154,6.697,2.154v-4.814c-1.345,0-2.597-.4-3.647-1.085Z"/>
+          </svg>
+        </a>
+      )}
+      {twitterUrl && (
+        <a href={twitterUrl} aria-label="Twitter" class="footer-social-link">
+          <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32" fill="currentColor">
+            <path d="M32,6.076c-1.177,.522-2.443,.875-3.771,1.034,1.355-.812,2.396-2.098,2.887-3.63-1.269,.752-2.674,1.299-4.169,1.593-1.198-1.276-2.904-2.073-4.792-2.073-3.626,0-6.565,2.939-6.565,6.565,0,.515,.058,1.016,.17,1.496-5.456-.274-10.294-2.888-13.532-6.86-.565,.97-.889,2.097-.889,3.301,0,2.278,1.159,4.287,2.921,5.465-1.076-.034-2.089-.33-2.975-.821-.001,.027-.001,.055-.001,.083,0,3.181,2.263,5.834,5.267,6.437-.551,.15-1.131,.23-1.729,.23-.423,0-.833-.041-1.233-.117,.834,2.603,3.253,4.498,6.12,4.552-2.242,1.757-5.069,2.803-8.139,2.803-.529,0-1.05-.031-1.564-.091,2.9,1.859,6.345,2.944,10.048,2.944,12.057,0,18.651-9.99,18.651-18.651,0-.284-.006-.567-.019-.849,1.281-.924,2.394-2.079,3.271-3.392Z"/>
           </svg>
         </a>
       )}
