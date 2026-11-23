@@ -129,7 +129,9 @@
     {
       "image": "/src/images/galleryImages/42/image.jpeg"
     },
-    {},
+    {
+      "image": "/src/images/galleryImages/43/image.jpeg"
+    },
     {
       "image": "/src/images/galleryImages/44/image.jpeg"
     },
@@ -138,9 +140,6 @@
     },
     {
       "image": "/src/images/galleryImages/46/image.jpeg"
-    },
-    {
-      "image": "/src/images/galleryImages/47/image.jpeg"
     }
   ]
 }
